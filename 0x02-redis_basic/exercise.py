@@ -6,6 +6,18 @@ import redis
 import uuid
 
 
+def replay(method: Callable) -> None:
+    "display the history of calls of a particular function"
+    client = redis.Redis()
+    name = method.__qualname__
+    ncalls = client.get(name).decode()
+    inputs = client.lrange(name + ':inputs', 0, -1)
+    outputs = client.lrange(name + ':outputs', 0, -1)
+    print(f"{name} was called {ncalls} times:")
+    for i, o in zip(inputs, outputs):
+        print(f"{name}(*{i.decode()}) -> {o.decode()}")
+
+
 def count_calls(method: Callable) -> Callable:
     @wraps(method)
     def wrapper(self, *args, **kwargs):
