@@ -6,14 +6,12 @@ import redis
 import requests
 
 
-client = redis.Redis()
-
-
 def cache(fn: Callable) -> Callable:
     "cache the the return value for 10 seconds"
     @wraps(fn)
     def wrapper(url: str) -> str:
         "function wrapper"
+        client = redis.Redis()
         client.incr(f'count:{url}')
         cached = client.get(f'cached:{url}')
         if cached:
