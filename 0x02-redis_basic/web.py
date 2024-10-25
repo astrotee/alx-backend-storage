@@ -15,11 +15,11 @@ def cache(fn: Callable) -> Callable:
     def wrapper(url: str) -> str:
         "function wrapper"
         client.incr(f'count:{url}')
-        cached = client.get(url)
+        cached = client.get(f'cached:{url}')
         if cached:
             return cached.decode()
         res = fn(url)
-        client.setex(url, 10, res)
+        client.setex(f'cached:{url}', 10, res)
         return res
     return wrapper
 
